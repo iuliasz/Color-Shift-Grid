@@ -1,8 +1,6 @@
 package com.colorshiftgrid.model;
 
-import org.jetbrains.annotations.NotNull;
-
-public abstract class ClassicMode extends GameMode{
+public class ClassicMode extends GameMode{
 
     @Override
     public boolean checkWin(Board board){
@@ -20,6 +18,7 @@ public abstract class ClassicMode extends GameMode{
         return true;
     }
 
+    @Override
     public int getProgress(Board board){
         int[][] grid = board.getGrid();
         int[] colorCount = new int[4];

@@ -1,5 +1,8 @@
 package com.colorshiftgrid;
 
+import com.colorshiftgrid.model.Board;
+import com.colorshiftgrid.model.ClassicMode;
+import com.colorshiftgrid.model.GameMode;
 import com.colorshiftgrid.view.GameView;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -7,38 +10,40 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
+    private int steps = 0;
+
     public static void main(String[] args) {
         launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) {
-        try {
-            // grid 5x5
-            GameView view = new GameView(5);
+        int gridSize = 5;
 
-            // create a test matrix
-            // rules: 0=red, 1=blue, 2=green, 3=yellow
-            int[][] testGrid = {
-                    {0, 1, 2, 3, 0},
-                    {1, 2, 3, 0, 1},
-                    {2, 3, 0, 1, 2},
-                    {3, 0, 1, 2, 3},
-                    {0, 1, 2, 3, 0}
-            };
+        Board board = new Board(gridSize);
+        GameView view = new GameView(gridSize);
+        GameMode mode = new ClassicMode();
 
-            // color the grid
-            view.updateGrid(testGrid);
+        // bind clicks directly
+        view.bindClickHandler((row, col) -> {
+            board.applyMove(row, col);
+            steps++;
 
-            // take the layout
-            Scene scene = new Scene(view.createLayout(), 600, 600);
+            view.updateGrid(board.getGrid());
+            view.updateStats(steps, mode.getProgress(board));
 
-            primaryStage.setTitle("Color Shift Grid");
-            primaryStage.setScene(scene);
-            primaryStage.show();
+            if (mode.checkWin(board)) {
+                System.out.println("WON");
+            }
+        });
 
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
+        view.updateGrid(board.getGrid());
+        view.updateStats(steps, mode.getProgress(board));
+
+        Scene scene = new Scene(view.createLayout(), 600, 600);
+
+        primaryStage.setTitle("Color Shift Grid");
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 }
