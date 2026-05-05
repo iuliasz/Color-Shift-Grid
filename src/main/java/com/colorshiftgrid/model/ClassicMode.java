@@ -39,6 +39,7 @@ public class ClassicMode extends GameMode{
         return maxColorCount;
     }
 
+    @Override
     public int getMoveLimit(){
         return -1;
     }

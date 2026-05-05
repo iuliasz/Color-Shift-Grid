@@ -62,10 +62,10 @@ public class GameView {
 
     private Color getColor(int value) {
         return switch (value) {
-            case 0 -> Color.RED;
-            case 1 -> Color.BLUE;
-            case 2 -> Color.GREEN;
-            case 3 -> Color.YELLOW;
+            case 0 -> Color.TOMATO;
+            case 1 -> Color.CORNFLOWERBLUE;
+            case 2 -> Color.YELLOWGREEN;
+            case 3 -> Color.GOLD;
             default -> Color.DARKGRAY;
         };
     }
