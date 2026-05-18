@@ -14,7 +14,7 @@ public class Board {
     private void initGrid(){
         for(int row=0; row<size; row++){
             for(int col=0; col<size; col++){
-                grid[row][col]=(int)(Math.random()*4);
+                grid[row][col]=0;
             }
         }
     }

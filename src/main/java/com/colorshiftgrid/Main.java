@@ -3,6 +3,7 @@ package com.colorshiftgrid;
 import com.colorshiftgrid.model.Board;
 import com.colorshiftgrid.model.ClassicMode;
 import com.colorshiftgrid.model.GameMode;
+import com.colorshiftgrid.model.LevelGenerator;
 import com.colorshiftgrid.view.GameView;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -18,30 +19,18 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        int gridSize = 5;
+        int gridSize = 3;
 
-        Board board = new Board(gridSize);
+        Board board=new Board(gridSize);
+        LevelGenerator generator=new LevelGenerator();
+        generator.applyRandomMoves(board,3);
         GameView view = new GameView(gridSize);
         GameMode mode = new ClassicMode();
 
-        // bind clicks directly
-        view.bindClickHandler((row, col) -> {
-            board.applyMove(row, col);
-            steps++;
-
-            view.updateGrid(board.getGrid());
-            view.updateStats(steps, mode.getProgress(board));
-
-            if (mode.checkWin(board)) {
-                System.out.println("WON");
-            }
-        });
-
-        view.updateGrid(board.getGrid());
-        view.updateStats(steps, mode.getProgress(board));
+        GameController controller=new GameController(board,view,mode);
+        view.bindController(controller);
 
         Scene scene = new Scene(view.createLayout(), 600, 600);
-
         primaryStage.setTitle("Color Shift Grid");
         primaryStage.setScene(scene);
         primaryStage.show();

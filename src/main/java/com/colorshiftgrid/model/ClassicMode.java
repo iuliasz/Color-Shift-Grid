@@ -22,7 +22,7 @@ public class ClassicMode extends GameMode{
     public int getProgress(Board board){
         int[][] grid = board.getGrid();
         int[] colorCount = new int[4];
-
+        int totalCells= grid.length*grid[0].length;
         for(int row=0; row<grid.length; row++){
             for(int col=0; col<grid.length; col++){
                 colorCount[grid[row][col]]++;
@@ -36,7 +36,7 @@ public class ClassicMode extends GameMode{
                 maxColorCount=colorCount[i];
             }
         }
-        return maxColorCount;
+        return (maxColorCount*100)/totalCells;
     }
 
     @Override
