@@ -1,5 +1,6 @@
 package com.colorshiftgrid.view;
 
+import com.colorshiftgrid.controller.GameController;
 import com.colorshiftgrid.model.Board;
 import javafx.scene.Parent;
 import javafx.scene.layout.BorderPane;
@@ -9,12 +10,16 @@ import javafx.scene.shape.Rectangle;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import javafx.scene.control.Button;
+import javafx.scene.layout.HBox;
 
 public class GameView {
     private BorderPane root;
     private GridPane gridPane;
     private Rectangle[][] cells;
     private Label statsLabel;
+    private Button undoBtn;
+    private Button restartBtn;
 
     public GameView(int gridSize) {
         root = new BorderPane();
@@ -42,6 +47,15 @@ public class GameView {
         topBox.setAlignment(Pos.CENTER);
         topBox.setStyle("-fx-padding: 20px; -fx-font-size: 18px; -fx-font-weight: bold;");
         root.setTop(topBox);
+
+        undoBtn=new Button("Undo");
+        restartBtn=new Button("Restart");
+
+        HBox bottomBox=new HBox(20,undoBtn,restartBtn);
+        bottomBox.setAlignment(Pos.CENTER);
+        bottomBox.setStyle("-fx-padding: 20px; -fx-font-size: 14px;");
+        root.setBottom(bottomBox);
+
     }
 
     public Parent createLayout() {
@@ -79,7 +93,7 @@ public class GameView {
             }
         }
     }
-    /*
+
     public void bindController(GameController controller) {
         for (int i = 0; i < cells.length; i++) {
             for (int j = 0; j < cells[0].length; j++) {
@@ -88,10 +102,10 @@ public class GameView {
                 cells[i][j].setOnMouseClicked(event -> controller.handleClick(row, col));
             }
         }
+        undoBtn.setOnAction(event->controller.undo());
+        restartBtn.setOnAction(event->controller.restart());
     }
     public void render(Board board) {
         updateGrid(board.getGrid());
     }
-     */
-
 }
