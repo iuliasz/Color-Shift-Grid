@@ -1,0 +1,46 @@
+package com.colorshiftgrid.model;
+
+public class ClassicMode extends GameMode{
+
+    @Override
+    public boolean checkWin(Board board){
+        int[][] grid = board.getGrid();
+        int firstColor = grid[0][0];
+
+        for(int row=0; row<grid.length; row++){
+            for(int col=0; col<grid.length; col++){
+                if(grid[row][col]!=firstColor){
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public int getProgress(Board board){
+        int[][] grid = board.getGrid();
+        int[] colorCount = new int[4];
+
+        for(int row=0; row<grid.length; row++){
+            for(int col=0; col<grid.length; col++){
+                colorCount[grid[row][col]]++;
+            }
+        }
+
+        int maxColorCount=colorCount[0];
+
+        for(int i=1; i<colorCount.length; i++){
+            if(colorCount[i]>maxColorCount){
+                maxColorCount=colorCount[i];
+            }
+        }
+        return maxColorCount;
+    }
+
+    @Override
+    public int getMoveLimit(){
+        return -1;
+    }
+}
