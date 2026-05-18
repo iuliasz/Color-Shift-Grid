@@ -36,7 +36,10 @@ public class ClassicMode extends GameMode{
                 maxColorCount=colorCount[i];
             }
         }
-        return maxColorCount;
+
+        int totalCells=grid.length * grid[0].length;
+
+        return (maxColorCount * 100) / totalCells;
     }
 
     @Override
