@@ -4,6 +4,11 @@ import com.colorshiftgrid.model.Board;
 import com.colorshiftgrid.model.GameMode;
 import com.colorshiftgrid.model.GameState;
 import com.colorshiftgrid.view.GameView;
+import com.colorshiftgrid.model.ClassicMode;
+import com.colorshiftgrid.model.ChallengeMode;
+import com.colorshiftgrid.model.PatternMode;
+import com.colorshiftgrid.util.LevelGenerator;
+import javafx.scene.control.Alert;
 
 import java.util.Stack;
 
@@ -14,6 +19,7 @@ public class GameController {
     private Stack<GameState> history;
     private int steps;
     private int[][] initialGrid;
+    private int[][] currentTargetGrid = null;
 
     public GameController(Board board,GameView view,GameMode mode){
         this.board=board;
@@ -33,9 +39,17 @@ public class GameController {
         updateView();
     }
 
-    public void handleClick(int row,int col){
-        history.push(new GameState(board.getGrid(),steps));
-        board.applyMove(row,col);
+    public void handleClick(int row, int col) {
+        if (mode.getMoveLimit() != -1 && steps >= mode.getMoveLimit()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Game Over");
+            alert.setHeaderText("You lost!");
+            alert.setContentText("Reached the max limit of: " + mode.getMoveLimit() + " pași. Folosește butonul de Undo sau Restart pentru a încerca din nou.");
+            alert.showAndWait();
+            return;
+        }
+        history.push(new GameState(board.getGrid(), steps));
+        board.applyMove(row, col);
         steps++;
         updateView();
         checkWin();
@@ -74,16 +88,52 @@ public class GameController {
         updateView();
     }
 
-    public boolean checkWin(){
-        if(mode.checkWin(board)){
-            System.out.println("Won in " + steps + " steps!");
+    public boolean checkWin() {
+        if (mode.checkWin(board)) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("VICTORY");
+            alert.setHeaderText("🎉 WELL DONE 🎉");
+            alert.setContentText("Solved the puzzle in " + steps + " steps!");
+            alert.showAndWait();
             return true;
         }
         return false;
     }
 
+
     public void updateView(){
         view.updateGrid(board.getGrid());
         view.updateStats(steps, mode.getProgress(board));
     }
+
+    public void changeMode(String modeName) {
+        switch (modeName) {
+            case "Classic Mode":
+                this.mode = new ClassicMode();
+                this.currentTargetGrid = null;
+                view.setTargetButtonVisible(false);
+                break;
+
+            case "Challenge Mode":
+                this.mode = new ChallengeMode(20);
+                this.currentTargetGrid = null;
+                view.setTargetButtonVisible(false);
+                break;
+
+            case "Pattern Mode":
+                LevelGenerator generator = new LevelGenerator();
+                Board targetBoard = generator.generateLevel(board.getGrid().length, 5);
+                this.currentTargetGrid = targetBoard.getGrid();
+                this.mode = new PatternMode(this.currentTargetGrid);
+                view.setTargetButtonVisible(true);
+                break;
+        }
+        restart();
+    }
+    public void showTargetPattern() {
+        if (currentTargetGrid != null) {
+            view.showTargetWindow(currentTargetGrid);
+        }
+    }
+
 }
