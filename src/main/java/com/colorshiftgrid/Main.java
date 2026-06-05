@@ -1,5 +1,6 @@
 package com.colorshiftgrid;
 
+import com.colorshiftgrid.controller.GameController;
 import com.colorshiftgrid.model.Board;
 import com.colorshiftgrid.model.ClassicMode;
 import com.colorshiftgrid.model.GameMode;

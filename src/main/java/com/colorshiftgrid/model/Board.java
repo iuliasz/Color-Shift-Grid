@@ -17,6 +17,16 @@ public class Board {
                 grid[row][col]=0;
             }
         }
+
+        int moves = 4;
+
+        for(int i=0; i<moves; i++){
+
+            int row=(int)(Math.random()*size);
+            int col=(int)(Math.random()*size);
+
+            applyMove(row,col);
+        }
     }
 
     public boolean isValid(int row, int col){

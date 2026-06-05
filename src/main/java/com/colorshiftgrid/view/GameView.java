@@ -1,7 +1,9 @@
 package com.colorshiftgrid.view;
 
-import com.colorshiftgrid.GameController;
-import com.colorshiftgrid.model.Board;
+import com.colorshiftgrid.controller.GameController;
+
+import javafx.stage.Stage;
+import javafx.scene.Scene;
 import javafx.scene.Parent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -12,6 +14,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
+import javafx.scene.control.ComboBox;
 
 public class GameView {
     private BorderPane root;
@@ -20,6 +23,8 @@ public class GameView {
     private Label statsLabel;
     private Button undoBtn;
     private Button restartBtn;
+    private ComboBox<String> modeSelector;
+    private Button targetBtn;
 
     public GameView(int gridSize) {
         root = new BorderPane();
@@ -43,15 +48,20 @@ public class GameView {
         }
 
         root.setCenter(gridPane);
-        VBox topBox = new VBox(statsLabel);
+
+        modeSelector = new ComboBox<>();
+        modeSelector.getItems().addAll("Classic Mode", "Challenge Mode", "Pattern Mode");
+        modeSelector.setValue("Classic Mode");
+        VBox topBox = new VBox(10, modeSelector, statsLabel);
         topBox.setAlignment(Pos.CENTER);
-        topBox.setStyle("-fx-padding: 20px; -fx-font-size: 18px; -fx-font-weight: bold;");
+        topBox.setStyle("-fx-padding: 20px; -fx-font-size: 16px; -fx-font-weight: bold;");
         root.setTop(topBox);
 
-        undoBtn=new Button("Undo");
-        restartBtn=new Button("Restart");
-
-        HBox bottomBox=new HBox(20,undoBtn,restartBtn);
+        undoBtn = new Button("Undo");
+        restartBtn = new Button("Restart");
+        targetBtn = new Button("Show Target");
+        targetBtn.setVisible(false);
+        HBox bottomBox = new HBox(20, undoBtn, restartBtn, targetBtn);
         bottomBox.setAlignment(Pos.CENTER);
         bottomBox.setStyle("-fx-padding: 20px; -fx-font-size: 14px;");
         root.setBottom(bottomBox);
@@ -77,21 +87,11 @@ public class GameView {
     private Color getColor(int value) {
         return switch (value) {
             case 0 -> Color.TOMATO;
-            case 1 -> Color.CORNFLOWERBLUE;
+            case 1 -> Color.GOLD;
             case 2 -> Color.YELLOWGREEN;
-            case 3 -> Color.GOLD;
+            case 3 -> Color.CORNFLOWERBLUE;
             default -> Color.DARKGRAY;
         };
-    }
-
-    public void bindClickHandler(java.util.function.BiConsumer<Integer, Integer> handler) {
-        for (int i = 0; i < cells.length; i++) {
-            for (int j = 0; j < cells[0].length; j++) {
-                final int row = i;
-                final int col = j;
-                cells[i][j].setOnMouseClicked(e -> handler.accept(row, col));
-            }
-        }
     }
 
     public void bindController(GameController controller) {
@@ -102,11 +102,38 @@ public class GameView {
                 cells[i][j].setOnMouseClicked(event -> controller.handleClick(row, col));
             }
         }
-        undoBtn.setOnAction(event->controller.undo());
-        restartBtn.setOnAction(event->controller.restart());
+        undoBtn.setOnAction(event -> controller.undo());
+        restartBtn.setOnAction(event -> controller.restart());
+        modeSelector.setOnAction(event -> controller.changeMode(modeSelector.getValue()));
+        targetBtn.setOnAction(event -> controller.showTargetPattern());
     }
-    public void render(Board board) {
-        updateGrid(board.getGrid());
+
+    public void showTargetWindow(int[][] targetGrid) {
+        Stage targetStage = new Stage();
+        GridPane miniGrid = new GridPane();
+        miniGrid.setAlignment(Pos.CENTER);
+        miniGrid.setHgap(3);
+        miniGrid.setVgap(3);
+        miniGrid.setStyle("-fx-padding: 20px;");
+
+        for (int i = 0; i < targetGrid.length; i++) {
+            for (int j = 0; j < targetGrid[0].length; j++) {
+                Rectangle rect = new Rectangle(40, 40);
+                rect.setFill(getColor(targetGrid[i][j]));
+                rect.setArcWidth(5);
+                rect.setArcHeight(5);
+                miniGrid.add(rect, j, i);
+            }
+        }
+
+        Scene targetScene = new Scene(miniGrid);
+        targetStage.setTitle("Modelul Țintă");
+        targetStage.setScene(targetScene);
+        targetStage.setAlwaysOnTop(true);
+        targetStage.show();
+    }
+    public void setTargetButtonVisible(boolean visible) {
+        targetBtn.setVisible(visible);
     }
 
 
