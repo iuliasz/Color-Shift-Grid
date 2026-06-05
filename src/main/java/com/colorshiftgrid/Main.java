@@ -27,7 +27,7 @@ public class Main extends Application {
         view.bindController(controller);
 
         view.updateGrid(board.getGrid());
-        view.updateStats(0, mode.getProgress(board));
+        view.updateStats(0, mode.getProgress(board), mode.getMoveLimit());
 
         Scene scene = new Scene(view.createLayout(), 600, 600);
 
