@@ -20,6 +20,9 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.DoubleBinding;
+
 public class GameView {
 
     private static final String BG_DARK      = "#0a0a14";
@@ -146,7 +149,7 @@ public class GameView {
 
         for (int i = 0; i < gridSize; i++) {
             for (int j = 0; j < gridSize; j++) {
-                Rectangle rect = new Rectangle(90, 100);
+                Rectangle rect = new Rectangle(120, 130);
                 rect.setFill(Color.GRAY);
                 rect.setArcWidth(4);
 
@@ -161,6 +164,17 @@ public class GameView {
 
         StackPane gridWrapper = new StackPane(buildScanlineOverlay(gridSize), gridPane);
         root.setCenter(gridWrapper);
+
+        gridWrapper.setMaxSize(1000, 800);
+        gridWrapper.setPrefSize(1000, 800);
+
+        var scale = Bindings.min(
+                root.widthProperty().divide(1200),
+                root.heightProperty().divide(1200)
+        );
+
+        gridPane.scaleXProperty().bind(scale);
+        gridPane.scaleYProperty().bind(scale);
 
         undoBtn     = buildButton("⟵ UNDO",     ACCENT_CYAN);
         restartBtn  = buildButton("↺ RESTART",  ACCENT_PINK);
