@@ -35,7 +35,7 @@ public class Main extends Application {
 
         primaryStage.setTitle("Color Shift Grid");
         primaryStage.setScene(scene);
-        primaryStage.setResizable(false);
+        primaryStage.setResizable(true);
         primaryStage.show();
     }
 }
