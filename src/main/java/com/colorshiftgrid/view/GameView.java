@@ -89,6 +89,20 @@ public class GameView {
                         "-fx-text-fill: " + TEXT_MAIN + ";"
         );
 
+        modeSelector.setButtonCell(new javafx.scene.control.ListCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item);
+                    setTextFill(Color.web("#E0F7FF"));
+                }
+            }
+        });
+
         // stats
         statsLabel = new Label("STEPS: 0  |  PROGRESS: 0%");
         statsLabel.setStyle(
