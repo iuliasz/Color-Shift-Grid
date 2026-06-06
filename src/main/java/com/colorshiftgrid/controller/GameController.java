@@ -77,13 +77,25 @@ public class GameController {
         }
     }
 
-    public void restart(){
-        board.resetTo(initialGrid);
-        history.clear();
-        steps = 0;
+    public void restart() {
+        changeMode(getCurrentModeName());
+    }
 
-        view.clearHintHighlight();
-        updateView();
+    private String getCurrentModeName() {
+
+        if (mode instanceof ClassicMode) {
+            return "Classic Mode";
+        }
+
+        if (mode instanceof ChallengeMode) {
+            return "Challenge Mode";
+        }
+
+        if (mode instanceof PatternMode) {
+            return "Pattern Mode";
+        }
+
+        return "Classic Mode";
     }
 
     public void setMode(GameMode mode){
