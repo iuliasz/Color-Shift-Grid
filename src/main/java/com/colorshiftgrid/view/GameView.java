@@ -277,22 +277,31 @@ public class GameView {
         miniGrid.setVgap(4);
         miniGrid.setStyle(
                 "-fx-padding: 20px;" +
-                        "-fx-background-color: " + BG_DARK + ";" +
-                        "-fx-border-color: " + ACCENT_CYAN + ";" +
-                        "-fx-border-width: 2px;"
+                "-fx-background-color: " + BG_DARK + ";" +
+                "-fx-border-color: " + ACCENT_CYAN + ";" +
+                "-fx-border-width: 2px;"
         );
 
         for (int i = 0; i < targetGrid.length; i++) {
             for (int j = 0; j < targetGrid[0].length; j++) {
-                Rectangle rect = new Rectangle(50, 50);
+                Rectangle rect = new Rectangle(90, 100);
 
                 Color c = getColor(targetGrid[i][j]);
+
                 rect.setFill(buildBlockFill(c));
                 rect.setArcWidth(4);
                 rect.setArcHeight(4);
-                DropShadow glow = new DropShadow(12, c);
+                rect.setStroke(Color.web("#000000"));
+                rect.setStrokeWidth(2);
+
+                DropShadow glow = new DropShadow(18, c);
                 glow.setSpread(0.3);
-                rect.setEffect(glow);
+
+                Glow g = new Glow(0.6);
+                g.setInput(glow);
+
+                rect.setEffect(g);
+
                 miniGrid.add(rect, j, i);
             }
         }
