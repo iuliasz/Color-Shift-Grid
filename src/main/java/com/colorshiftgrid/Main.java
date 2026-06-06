@@ -7,6 +7,7 @@ import com.colorshiftgrid.model.GameMode;
 import com.colorshiftgrid.view.GameView;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -29,10 +30,12 @@ public class Main extends Application {
         view.updateGrid(board.getGrid());
         view.updateStats(0, mode.getProgress(board), mode.getMoveLimit());
 
-        Scene scene = new Scene(view.createLayout(), 600, 600);
+        Scene scene = new Scene(view.createLayout(), 640, 680);
+        scene.setFill(Color.web("#0a0a14"));
 
         primaryStage.setTitle("Color Shift Grid");
         primaryStage.setScene(scene);
+        primaryStage.setResizable(false);
         primaryStage.show();
     }
 }

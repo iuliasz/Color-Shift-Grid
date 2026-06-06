@@ -10,7 +10,14 @@ import com.colorshiftgrid.model.ClassicMode;
 import com.colorshiftgrid.model.ChallengeMode;
 import com.colorshiftgrid.model.PatternMode;
 import com.colorshiftgrid.util.LevelGenerator;
+import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.stage.StageStyle;
+
 
 import java.util.List;
 import java.util.Stack;
@@ -43,13 +50,10 @@ public class GameController {
 
     public void handleClick(int row, int col) {
         if (mode.getMoveLimit() != -1 && steps >= mode.getMoveLimit()) {
-            showMessage(
-                    Alert.AlertType.ERROR,
-                    "Game Over",
-                    "You lost!",
-                    "You reached the move limit: " + mode.getMoveLimit()
-                            + ". Use Undo, Restart or Hint and try again."
-            );
+            showMessage(Alert.AlertType.ERROR,
+                    "GAME OVER",
+                    "MOVE LIMIT REACHED",
+                    "You used all " + mode.getMoveLimit() + " moves.\nUse UNDO, RESTART, or HINT.");
             return;
         }
         history.push(new GameState(board.getGrid(), steps));
@@ -94,8 +98,8 @@ public class GameController {
             showMessage(
                     Alert.AlertType.INFORMATION,
                     "VICTORY",
-                    "🎉 WELL DONE 🎉",
-                    "Solved the puzzle in " + steps + " steps!"
+                    "★  PUZZLE SOLVED  ★",
+                    "Completed in " + steps + " steps!"
             );
 
             return true;
@@ -166,9 +170,9 @@ public class GameController {
         if (currentSolution.isEmpty()) {
             showMessage(
                     Alert.AlertType.INFORMATION,
-                    "Hint",
-                    "No hint needed",
-                    "The board is already solved or no path was found."
+                    "HINT",
+                    "NO HINT NEEDED",
+                    "Board is already solved or no path found."
             );
             return;
         }
@@ -177,9 +181,9 @@ public class GameController {
 
         view.highlightCell(nextMove.getRow(), nextMove.getCol());
         view.updateHint(
-                "Hint: click row " + (nextMove.getRow() + 1)
-                        + ", column " + (nextMove.getCol() + 1)
-                        + " | Remaining optimal moves: " + currentSolution.size()
+                "Clicklick row " + (nextMove.getRow() + 1)
+                        + ", col " + (nextMove.getCol() + 1)
+                        + " | Optimal moves left: " + currentSolution.size()
         );
     }
 
@@ -202,9 +206,48 @@ public class GameController {
 
     private void showMessage(Alert.AlertType type, String title, String header, String content) {
         Alert alert = new Alert(type);
+        alert.initStyle(StageStyle.UNDECORATED);
         alert.setTitle(title);
-        alert.setHeaderText(header);
-        alert.setContentText(content);
+        alert.setHeaderText(null);
+        alert.setGraphic(null);
+
+        DialogPane dp = alert.getDialogPane();
+        dp.setStyle(
+                "-fx-background-color: #0a0a14;" +
+                        "-fx-border-color: #00e5ff;" +
+                        "-fx-border-width: 2px;" +
+                        "-fx-border-radius: 6px;" +
+                        "-fx-background-radius: 6px;"
+        );
+
+        Label headerLbl = new Label(header);
+        headerLbl.setStyle(
+                "-fx-font-family: 'Courier New'; -fx-font-size: 18px; -fx-font-weight: bold;" +
+                        "-fx-text-fill: #00e5ff;"
+        );
+
+        Label contentLbl = new Label(content);
+        contentLbl.setStyle(
+                "-fx-font-family: 'Courier New'; -fx-font-size: 13px;" +
+                        "-fx-text-fill: #e0f7ff; -fx-padding: 8 0 0 0;"
+        );
+
+        VBox box = new VBox(10, headerLbl, contentLbl);
+        box.setAlignment(Pos.CENTER);
+        box.setStyle("-fx-padding: 24px 32px;");
+        dp.setContent(box);
+
+        // Style OK button
+        dp.getButtonTypes().stream().findFirst().ifPresent(bt -> {
+            dp.lookupButton(bt).setStyle(
+                    "-fx-font-family: 'Courier New'; -fx-font-size: 13px; -fx-font-weight: bold;" +
+                            "-fx-text-fill: #00e5ff; -fx-background-color: transparent;" +
+                            "-fx-border-color: #00e5ff; -fx-border-width: 1.5px;" +
+                            "-fx-border-radius: 3px; -fx-background-radius: 3px;" +
+                            "-fx-padding: 6px 20px; -fx-cursor: hand;"
+            );
+        });
+
         alert.showAndWait();
     }
 }
