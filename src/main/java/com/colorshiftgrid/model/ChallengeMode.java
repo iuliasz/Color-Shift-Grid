@@ -6,6 +6,7 @@ public class ChallengeMode extends GameMode {
     public ChallengeMode(int moveLimit) {
         this.moveLimit = moveLimit;
     }
+
     @Override
     public boolean checkWin(Board board) {
         int[][] grid = board.getGrid();
@@ -20,6 +21,7 @@ public class ChallengeMode extends GameMode {
         }
         return true;
     }
+
     @Override
     public int getProgress(Board board) {
         int[][] grid = board.getGrid();
@@ -40,6 +42,7 @@ public class ChallengeMode extends GameMode {
         }
         return (maxColorCount * 100) / totalCells;
     }
+
     @Override
     public int getMoveLimit() {
         return moveLimit;

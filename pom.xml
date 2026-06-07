@@ -19,7 +19,10 @@
       <artifactId>javafx-controls</artifactId>
       <version>21.0.6</version>
     </dependency>
-
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-media</artifactId>
+      <version>21.0.6</version> </dependency>
 <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
@@ -31,7 +34,8 @@
       <artifactId>junit-jupiter-engine</artifactId>
       <version>${junit.version}</version>
       <scope>test</scope>
-    </dependency>  </dependencies>
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>

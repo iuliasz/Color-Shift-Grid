@@ -6,6 +6,7 @@ public class PatternMode extends GameMode {
     public PatternMode(int[][] targetGrid) {
         this.targetGrid = targetGrid;
     }
+
     @Override
     public boolean checkWin(Board board) {
         int[][] grid = board.getGrid();
@@ -18,6 +19,7 @@ public class PatternMode extends GameMode {
         }
         return true;
     }
+
     @Override
     public int getProgress(Board board) {
         int[][] grid = board.getGrid();
@@ -33,6 +35,7 @@ public class PatternMode extends GameMode {
         }
         return (matchingCells * 100) / totalCells;
     }
+
     @Override
     public int getMoveLimit() {
         return -1;

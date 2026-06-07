@@ -3,54 +3,59 @@ package com.colorshiftgrid.controller;
 import com.colorshiftgrid.model.Board;
 import com.colorshiftgrid.model.GameMode;
 import com.colorshiftgrid.model.GameState;
+import com.colorshiftgrid.util.Move;
+import com.colorshiftgrid.util.PuzzleSolver;
 import com.colorshiftgrid.view.GameView;
 import com.colorshiftgrid.model.ClassicMode;
 import com.colorshiftgrid.model.ChallengeMode;
 import com.colorshiftgrid.model.PatternMode;
-import com.colorshiftgrid.model.LevelGenerator;
+import com.colorshiftgrid.util.LevelGenerator;
+import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
-
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+import javafx.stage.StageStyle;
+import java.util.List;
 import java.util.Stack;
 
 public class GameController {
     private Board board;
     private GameView view;
-    private GameMode mode;
+    private final PuzzleSolver solver;
     private Stack<GameState> history;
+
+    private GameMode mode;
     private int steps;
     private int[][] initialGrid;
-    private int[][] currentTargetGrid = null;
+    private int[][] currentTargetGrid;
+    private List<Move> currentSolution;
 
     public GameController(Board board,GameView view,GameMode mode){
         this.board=board;
         this.view=view;
         this.mode=mode;
         this.history=new Stack<>();
-        this.steps=0;
-
-        int[][] currGrid= board.getGrid();
-        this.initialGrid=new int[currGrid.length][currGrid[0].length];
-        for(int i=0;i<currGrid.length;i++){
-            for(int j=0;j<currGrid.length;j++){
-                this.initialGrid[i][j]=currGrid[i][j];
-            }
-        }
-
+        this.solver = new PuzzleSolver();
+        this.steps = 0;
+        this.initialGrid = board.copyGrid();
+        this.currentTargetGrid = null;
+        this.currentSolution = List.of();
         updateView();
     }
 
     public void handleClick(int row, int col) {
         if (mode.getMoveLimit() != -1 && steps >= mode.getMoveLimit()) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Game Over");
-            alert.setHeaderText("Ai pierdut! 💀");
-            alert.setContentText("Ai atins limita maximă de " + mode.getMoveLimit() + " pași. Folosește butonul de Undo sau Restart pentru a încerca din nou.");
-            alert.showAndWait();
+            showMessage(Alert.AlertType.ERROR,
+                    "GAME OVER",
+                    "MOVE LIMIT REACHED",
+                    "You used all " + mode.getMoveLimit() + " moves.\nUse UNDO, RESTART, or HINT.");
             return;
         }
         history.push(new GameState(board.getGrid(), steps));
         board.applyMove(row, col);
         steps++;
+        view.clearHintHighlight();
         updateView();
         checkWin();
     }
@@ -59,37 +64,40 @@ public class GameController {
         if(!history.isEmpty()){
             GameState previousState=history.pop();
             this.steps=previousState.getSteps();
-            int[][] savedGrid=previousState.getGrid();
-            int[][] currGrid=board.getGrid();
-            for(int i=0;i<currGrid.length;i++){
-                for(int j=0;j< currGrid.length;j++){
-                    currGrid[i][j]=savedGrid[i][j];
-                }
-            }
-
+            board.resetTo(previousState.getGrid());
+            view.clearHintHighlight();
             updateView();
         }
     }
 
-    public void restart(){
-        int[][] currGrid= board.getGrid();
-        for(int i=0;i<currGrid.length;i++){
-            for(int j=0;j<currGrid.length;j++){
-                currGrid[i][j]=initialGrid[i][j];
-            }
+    public void restart() {
+        changeMode(getCurrentModeName());
+    }
+
+    private String getCurrentModeName() {
+
+        if (mode instanceof ClassicMode) {
+            return "Classic Mode";
         }
-        history.clear();
-        steps=0;
-        updateView();
+        if (mode instanceof ChallengeMode) {
+            return "Challenge Mode";
+        }
+        if (mode instanceof PatternMode) {
+            return "Pattern Mode";
+        }
+        return "Classic Mode";
     }
 
     public boolean checkWin() {
         if (mode.checkWin(board)) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Victorie");
-            alert.setHeaderText("🎉 FELICITĂRI! 🎉");
-            alert.setContentText("Ai rezolvat puzzle-ul în " + steps + " pași!");
-            alert.showAndWait();
+            view.clearHintHighlight();
+            view.playWinSound(); // Sună trompetele!
+            showMessage(
+                    Alert.AlertType.INFORMATION,
+                    "VICTORY",
+                    "★  PUZZLE SOLVED  ★",
+                    "Completed in " + steps + " steps!"
+            );
             return true;
         }
         return false;
@@ -97,36 +105,144 @@ public class GameController {
 
     public void updateView(){
         view.updateGrid(board.getGrid());
-        view.updateStats(steps, mode.getProgress(board));
+        view.updateStats(steps, mode.getProgress(board), mode.getMoveLimit());
     }
 
     public void changeMode(String modeName) {
+        LevelGenerator generator = new LevelGenerator();
+        int size = board.getGrid().length;
+
         switch (modeName) {
-            case "Classic Mode":
+            case "Classic Mode" -> {
                 this.mode = new ClassicMode();
                 this.currentTargetGrid = null;
+                board.resetTo(generator.generateLevel(size, 4).getGrid());
                 view.setTargetButtonVisible(false);
-                break;
+            }
 
-            case "Challenge Mode":
-                this.mode = new ChallengeMode(20);
+            case "Challenge Mode" -> {
+                this.mode = new ChallengeMode(12);
                 this.currentTargetGrid = null;
+                board.resetTo(generator.generateLevel(size, 5).getGrid());
                 view.setTargetButtonVisible(false);
-                break;
+            }
 
-            case "Pattern Mode":
-                LevelGenerator generator = new LevelGenerator();
-                Board targetBoard = generator.generateLevel(board.getGrid().length, 5);
-                this.currentTargetGrid = targetBoard.getGrid();
+            case "Pattern Mode" -> {
+                Board startBoard = generator.generateLevel(size, 4);
+                Board targetBoard = new Board(size, false);
+                targetBoard.resetTo(startBoard.getGrid());
+                generator.applyRandomMoves(targetBoard, 4);
+                board.resetTo(startBoard.getGrid());
+                this.currentTargetGrid = targetBoard.copyGrid();
                 this.mode = new PatternMode(this.currentTargetGrid);
                 view.setTargetButtonVisible(true);
-                break;
+            }
         }
-        restart();
+
+        this.initialGrid = board.copyGrid();
+        history.clear();
+        steps = 0;
+        view.clearHintHighlight();
+        updateView();
     }
+
     public void showTargetPattern() {
         if (currentTargetGrid != null) {
             view.showTargetWindow(currentTargetGrid);
         }
+    }
+
+    public void showHint() {
+        currentSolution = getCurrentSolution();
+        if (currentSolution.isEmpty()) {
+            showMessage(
+                    Alert.AlertType.INFORMATION,
+                    "HINT",
+                    "NO HINT NEEDED",
+                    "Board is already solved or no path found."
+            );
+            return;
+        }
+        Move nextMove = currentSolution.get(0);
+        view.highlightCell(nextMove.getRow(), nextMove.getCol());
+        view.updateHint(
+                "Clicklick row " + (nextMove.getRow() + 1)
+                        + ", col " + (nextMove.getCol() + 1)
+                        + " | Optimal moves left: " + currentSolution.size()
+        );
+    }
+
+    public void autoStep() {
+        List<Move> solution = getCurrentSolution();
+        if (!solution.isEmpty()) {
+            Move move = solution.get(0);
+            handleClick(move.getRow(), move.getCol());
+        }
+    }
+
+    private List<Move> getCurrentSolution() {
+        if (currentTargetGrid != null) {
+            return solver.findShortestSolutionToTarget(board.getGrid(), currentTargetGrid);
+        }
+        return solver.findShortestSolutionToUniformColor(board.getGrid());
+    }
+
+    private void showMessage(Alert.AlertType type, String title, String header, String content) {
+        Alert alert = new Alert(type);
+        alert.initStyle(StageStyle.UNDECORATED);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setGraphic(null);
+
+        DialogPane dp = alert.getDialogPane();
+        dp.setStyle(
+                "-fx-background-color: #0a0a14;" +
+                        "-fx-border-color: #00e5ff;" +
+                        "-fx-border-width: 2px;" +
+                        "-fx-border-radius: 6px;" +
+                        "-fx-background-radius: 6px;"
+        );
+
+        Label headerLbl = new Label(header);
+        headerLbl.setStyle(
+                "-fx-font-family: 'Courier New'; -fx-font-size: 18px; -fx-font-weight: bold;" +
+                        "-fx-text-fill: #00e5ff;"
+        );
+
+        Label contentLbl = new Label(content);
+        contentLbl.setStyle(
+                "-fx-font-family: 'Courier New'; -fx-font-size: 13px;" +
+                        "-fx-text-fill: #e0f7ff; -fx-padding: 8 0 0 0;"
+        );
+
+        VBox box = new VBox(10, headerLbl, contentLbl);
+        box.setAlignment(Pos.CENTER);
+        box.setStyle("-fx-padding: 24px 32px;");
+        dp.setContent(box);
+
+        // Style OK button
+        dp.getButtonTypes().stream().findFirst().ifPresent(bt -> {
+            dp.lookupButton(bt).setStyle(
+                    "-fx-font-family: 'Courier New'; -fx-font-size: 13px; -fx-font-weight: bold;" +
+                            "-fx-text-fill: #00e5ff; -fx-background-color: transparent;" +
+                            "-fx-border-color: #00e5ff; -fx-border-width: 1.5px;" +
+                            "-fx-border-radius: 3px; -fx-background-radius: 3px;" +
+                            "-fx-padding: 6px 20px; -fx-cursor: hand;"
+            );
+        });
+
+        alert.showAndWait();
+    }
+
+    public void showRules() {
+        String rulesText =
+                "▸ Click pe o celulă pentru a-i schimba culoarea.\n\n" +
+                        "▸ Vecinii adiacenți (Sus, Jos, Stânga, Dreapta)\n" +
+                        "  își vor schimba și ei culoarea simultan!\n\n" +
+                        "▸ CLASSIC: Fă toată tabla de o singură culoare.\n" +
+                        "▸ CHALLENGE: Câștigă înainte de a termina pașii.\n" +
+                        "▸ PATTERN: Reproduce exact matricea TARGET.";
+
+        showMessage(Alert.AlertType.INFORMATION, "TUTORIAL", "HOW TO PLAY", rulesText);
     }
 }
