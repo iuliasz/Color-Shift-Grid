@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class Board {
-    private int[][] grid;
-    private int size;
+    private final int[][] grid;
+    private final int size;
 
     public Board(int size){
         this.size = size;
@@ -21,10 +21,6 @@ public class Board {
         if (scramble) {
             scrambleFromSolved(suggestedScrambleMoves(size));
         }
-    }
-
-    public int getSize() {
-        return size;
     }
 
     public boolean isValid(int row, int col){
@@ -52,15 +48,8 @@ public class Board {
 
     public void resetTo(int[][] sourceGrid) {
         for (int row = 0; row < size; row++) {
-            for (int col = 0; col < size; col++) {
-                grid[row][col] = sourceGrid[row][col];
-            }
+            System.arraycopy(sourceGrid[row], 0, grid[row], 0, size);
         }
-    }
-
-    public void reset(){
-        clearToSolved();
-        scrambleFromSolved(suggestedScrambleMoves(size));
     }
 
     public int[][] getGrid(){
@@ -71,9 +60,7 @@ public class Board {
         int[][] copy = new int[size][size];
 
         for (int row = 0; row < size; row++) {
-            for (int col = 0; col < size; col++) {
-                copy[row][col] = grid[row][col];
-            }
+            System.arraycopy(grid[row], 0, copy[row], 0, size);
         }
 
         return copy;
