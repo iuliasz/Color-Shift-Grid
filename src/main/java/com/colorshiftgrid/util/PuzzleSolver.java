@@ -138,13 +138,6 @@ public class PuzzleSolver {
         return path;
     }
 
-    private static class Parent {
-        private final long previousState;
-        private final Move move;
-
-        private Parent(long previousState, Move move) {
-            this.previousState = previousState;
-            this.move = move;
-        }
+    private record Parent(long previousState, Move move) {
     }
 }
