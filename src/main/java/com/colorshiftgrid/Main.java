@@ -9,12 +9,9 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.scene.input.KeyCode;
 
 public class Main extends Application {
-
-    public static void main(String[] args) {
-        launch(args);
-    }
 
     @Override
     public void start(Stage primaryStage) {
@@ -32,6 +29,24 @@ public class Main extends Application {
 
         Scene scene = new Scene(view.createLayout(), 640, 680);
         scene.setFill(Color.web("#0a0a14"));
+
+        scene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.U) {
+                controller.undo();
+            } else if (event.getCode() == KeyCode.Z && event.isControlDown()) {
+                controller.undo();
+            } else if (event.getCode() == KeyCode.R) {
+                controller.restart();
+            } else if (event.getCode() == KeyCode.H) {
+                controller.showHint();
+            }else if (event.getCode() == KeyCode.A) {
+                controller.autoStep();
+            }else if (event.getCode() == KeyCode.I) {
+                controller.showInfo();
+            }else if (event.getCode() == KeyCode.T) {
+                controller.showTargetPattern();
+            }
+        });
 
         primaryStage.setTitle("Color Shift Grid");
         primaryStage.setScene(scene);
