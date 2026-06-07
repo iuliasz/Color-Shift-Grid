@@ -1,24 +1,11 @@
 package com.colorshiftgrid.util;
 
-public class Move {
-    private final int row;
-    private final int col;
+import org.jetbrains.annotations.NotNull;
 
-    public Move(int row, int col) {
-        this.row = row;
-        this.col = col;
-    }
-
-    public int getRow() {
-        return row;
-    }
-
-    public int getCol() {
-        return col;
-    }
+public record Move(int row, int col) {
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return "(" + (row + 1) + ", " + (col + 1) + ")";
     }
 }
