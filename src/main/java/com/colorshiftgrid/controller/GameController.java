@@ -15,18 +15,18 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.stage.StageStyle;
+import org.jetbrains.annotations.NotNull;
 
 
 import java.util.List;
 import java.util.Stack;
 
 public class GameController {
-    private Board board;
-    private GameView view;
+    private final Board board;
+    private final GameView view;
     private final PuzzleSolver solver;
-    private Stack<GameState> history;
+    private final Stack<GameState> history;
 
     private GameMode mode;
     private int steps;
@@ -68,9 +68,9 @@ public class GameController {
     public void undo(){
         if(!history.isEmpty()){
             GameState previousState=history.pop();
-            this.steps=previousState.getSteps();
+            this.steps=previousState.steps();
 
-            board.resetTo(previousState.getGrid());
+            board.resetTo(previousState.grid());
 
             view.clearHintHighlight();
             updateView();
@@ -98,14 +98,10 @@ public class GameController {
         return "Classic Mode";
     }
 
-    public void setMode(GameMode mode){
-        this.mode=mode;
-        updateView();
-    }
-
-    public boolean checkWin() {
+    public void checkWin() {
         if (mode.checkWin(board)) {
             view.clearHintHighlight();
+            view.playWinSound();
 
             showMessage(
                     Alert.AlertType.INFORMATION,
@@ -114,9 +110,7 @@ public class GameController {
                     "Completed in " + steps + " steps!"
             );
 
-            return true;
         }
-        return false;
     }
 
 
@@ -191,10 +185,10 @@ public class GameController {
 
         Move nextMove = currentSolution.get(0);
 
-        view.highlightCell(nextMove.getRow(), nextMove.getCol());
+        view.highlightCell(nextMove.row(), nextMove.col());
         view.updateHint(
-                "Clicklick row " + (nextMove.getRow() + 1)
-                        + ", col " + (nextMove.getCol() + 1)
+                "Click row " + (nextMove.row() + 1)
+                        + ", col " + (nextMove.col() + 1)
                         + " | Optimal moves left: " + currentSolution.size()
         );
     }
@@ -204,7 +198,7 @@ public class GameController {
 
         if (!solution.isEmpty()) {
             Move move = solution.get(0);
-            handleClick(move.getRow(), move.getCol());
+            handleClick(move.row(), move.col());
         }
     }
 
@@ -226,41 +220,68 @@ public class GameController {
         DialogPane dp = alert.getDialogPane();
         dp.setStyle(
                 "-fx-background-color: #0a0a14;" +
-                        "-fx-border-color: #00e5ff;" +
-                        "-fx-border-width: 2px;" +
-                        "-fx-border-radius: 6px;" +
-                        "-fx-background-radius: 6px;"
+                "-fx-border-color: #00e5ff;" +
+                "-fx-border-width: 2px;" +
+                "-fx-border-radius: 6px;" +
+                "-fx-background-radius: 6px;"
         );
 
+        VBox box = getVBox(header, content);
+        dp.setContent(box);
+
+        // Style OK button
+        dp.getButtonTypes().stream().findFirst().ifPresent(bt -> dp.lookupButton(bt).setStyle(
+                "-fx-font-family: 'Courier New'; -fx-font-size: 13px; -fx-font-weight: bold;" +
+                "-fx-text-fill: #00e5ff; -fx-background-color: transparent;" +
+                "-fx-border-color: #00e5ff; -fx-border-width: 2px;" +
+                "-fx-border-radius: 3px; -fx-background-radius: 3px;" +
+                "-fx-padding: 6px 20px; -fx-cursor: hand;"
+        ));
+
+        alert.showAndWait();
+    }
+
+    private static @NotNull VBox getVBox(String header, String content) {
         Label headerLbl = new Label(header);
         headerLbl.setStyle(
                 "-fx-font-family: 'Courier New'; -fx-font-size: 18px; -fx-font-weight: bold;" +
-                        "-fx-text-fill: #00e5ff;"
+                "-fx-text-fill: #00e5ff;"
         );
 
         Label contentLbl = new Label(content);
         contentLbl.setStyle(
-                "-fx-font-family: 'Courier New'; -fx-font-size: 13px;" +
-                        "-fx-text-fill: #e0f7ff; -fx-padding: 8 0 0 0;"
+                "-fx-font-family: 'Courier New'; -fx-font-size: 18px;" +
+                "-fx-text-fill: #e0f7ff; -fx-padding: 8 0 0 0;"
         );
 
         VBox box = new VBox(10, headerLbl, contentLbl);
         box.setAlignment(Pos.CENTER);
         box.setStyle("-fx-padding: 24px 32px;");
-        dp.setContent(box);
-
-        // Style OK button
-        dp.getButtonTypes().stream().findFirst().ifPresent(bt -> {
-            dp.lookupButton(bt).setStyle(
-                    "-fx-font-family: 'Courier New'; -fx-font-size: 13px; -fx-font-weight: bold;" +
-                            "-fx-text-fill: #00e5ff; -fx-background-color: transparent;" +
-                            "-fx-border-color: #00e5ff; -fx-border-width: 1.5px;" +
-                            "-fx-border-radius: 3px; -fx-background-radius: 3px;" +
-                            "-fx-padding: 6px 20px; -fx-cursor: hand;"
-            );
-        });
-
-        alert.showAndWait();
+        return box;
     }
+
+    public void showInfo() {
+        String infoText =
+                """
+                        ▸ Click on cell to change its color.
+                        
+                        ▸ Neighbour cells (Up, Down, Left, Right)
+                          will change their color simultaneously!
+                        
+                        ▸ CLASSIC: One color grid.
+                        ▸ CHALLENGE: Win before the step limit.
+                        ▸ PATTERN: Change to pattern grid.
+                        
+                        ▸ Press key I: info
+                        ▸ Press key U: undo
+                        ▸ Press key R: restart
+                        ▸ Press key H: hint
+                        ▸ Press key A: auto
+                        ▸ Press key T: target""";
+
+
+        showMessage(Alert.AlertType.INFORMATION, "TUTORIAL", "HOW TO PLAY", infoText);
+    }
+
 }
 
