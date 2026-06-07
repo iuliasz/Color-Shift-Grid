@@ -1,7 +1,7 @@
 package com.colorshiftgrid.model;
 
 public class ChallengeMode extends GameMode {
-    private int moveLimit;
+    private final int moveLimit;
 
     public ChallengeMode(int moveLimit) {
         this.moveLimit = moveLimit;
