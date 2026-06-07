@@ -1,7 +1,6 @@
 package com.colorshiftgrid.view;
 
 import com.colorshiftgrid.controller.GameController;
-import com.colorshiftgrid.model.Board;
 import javafx.animation.ScaleTransition;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -19,9 +18,11 @@ import javafx.scene.paint.CycleMethod;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.scene.media.AudioClip;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.DoubleBinding;
+
+import java.util.Objects;
 
 public class GameView {
 
@@ -33,6 +34,8 @@ public class GameView {
     private static final String TEXT_MAIN    = "#e0f7ff";
     private static final String TEXT_DIM     = "#4a7080";
 
+    private AudioClip winSound;
+
     private static final Color[] BLOCK_COLORS = {
             Color.web("#ff2d78"),   // hot pink
             Color.web("#ffe600"),   // neon yellow
@@ -41,7 +44,6 @@ public class GameView {
     };
 
     private final BorderPane root;
-    private final GridPane gridPane;
     private final Rectangle[][] cells;
 
     private final Label statsLabel;
@@ -52,12 +54,13 @@ public class GameView {
     private final Button hintBtn;
     private final Button targetBtn;
     private final Button autoStepBtn;
+    private final Button infoBtn;
 
     private final ComboBox<String> modeSelector;
 
     public GameView(int gridSize) {
         root = new BorderPane();
-        gridPane = new GridPane();
+        GridPane gridPane = new GridPane();
         cells = new Rectangle[gridSize][gridSize];
 
         // main background
@@ -176,6 +179,7 @@ public class GameView {
         gridPane.scaleXProperty().bind(scale);
         gridPane.scaleYProperty().bind(scale);
 
+        infoBtn = buildButton("ⓘ INFO", TEXT_MAIN);
         undoBtn     = buildButton("⟵ UNDO",     ACCENT_CYAN);
         restartBtn  = buildButton("↺ RESTART",  ACCENT_PINK);
         hintBtn     = buildButton("? HINT",      "#ffe600");
@@ -183,10 +187,16 @@ public class GameView {
         targetBtn   = buildButton("◉ TARGET",   ACCENT_CYAN);
         targetBtn.setVisible(false);
 
-        HBox bottomBox = new HBox(10, undoBtn, restartBtn, hintBtn, autoStepBtn, targetBtn);
+        HBox bottomBox = new HBox(10, infoBtn,undoBtn, restartBtn, hintBtn, autoStepBtn, targetBtn);
         bottomBox.setAlignment(Pos.CENTER);
         bottomBox.setStyle("-fx-padding: 16px 20px 22px 20px;");
         root.setBottom(bottomBox);
+
+        try {
+            winSound = new AudioClip(Objects.requireNonNull(getClass().getResource("/audio/winner.mp3")).toExternalForm());
+        } catch (Exception e) {
+            System.out.println("Audio file not found!");
+        }
     }
 
     public Parent createLayout() {
@@ -217,8 +227,8 @@ public class GameView {
         hintLabel.setText("▸  " + text.toUpperCase());
         hintLabel.setStyle(
                 "-fx-font-family: 'Courier New';" +
-                        "-fx-font-size: 12px;" +
-                        "-fx-text-fill: #ffe600;"
+                "-fx-font-size: 12px;" +
+                "-fx-text-fill: #ffe600;"
         );
     }
 
@@ -252,16 +262,6 @@ public class GameView {
         );
     }
 
-    public void bindClickHandler(java.util.function.BiConsumer<Integer, Integer> handler) {
-        for (int i = 0; i < cells.length; i++) {
-            for (int j = 0; j < cells[0].length; j++) {
-                final int row = i;
-                final int col = j;
-                cells[i][j].setOnMouseClicked(e -> handler.accept(row, col));
-            }
-        }
-    }
-
     public void bindController(GameController controller) {
         for (int i = 0; i < cells.length; i++) {
             for (int j = 0; j < cells[0].length; j++) {
@@ -274,6 +274,7 @@ public class GameView {
                 });
             }
         }
+        infoBtn.setOnAction(e -> controller.showInfo());
         undoBtn.setOnAction(e  -> controller.undo());
         restartBtn.setOnAction(e -> controller.restart());
         hintBtn.setOnAction(e  -> controller.showHint());
@@ -342,11 +343,7 @@ public class GameView {
         targetBtn.setVisible(visible);
     }
 
-    public void render(Board board) {
-        updateGrid(board.getGrid());
-    }
-
-    // helper fcts
+    // helper functions
     private Color getColor(int value) {
         if (value >= 0 && value < BLOCK_COLORS.length) return BLOCK_COLORS[value];
         return Color.DARKGRAY;
@@ -401,7 +398,7 @@ public class GameView {
                 "-fx-text-fill: " + hexColor + ";" +
                 "-fx-background-color: transparent;" +
                 "-fx-border-color: " + hexColor + ";" +
-                "-fx-border-width: 1.5px;" +
+                "-fx-border-width: 2px;" +
                 "-fx-border-radius: 3px;" +
                 "-fx-background-radius: 3px;" +
                 "-fx-padding: 7px 14px;";
@@ -434,5 +431,9 @@ public class GameView {
         st.setCycleCount(2);
         st.setAutoReverse(true);
         st.play();
+    }
+
+    public void playWinSound() {
+        if (winSound != null) winSound.play(0.6);
     }
 }
