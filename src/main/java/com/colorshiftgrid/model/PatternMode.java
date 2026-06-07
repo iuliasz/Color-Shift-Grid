@@ -1,7 +1,7 @@
 package com.colorshiftgrid.model;
 
 public class PatternMode extends GameMode {
-    private int[][] targetGrid;
+    private final int[][] targetGrid;
 
     public PatternMode(int[][] targetGrid) {
         this.targetGrid = targetGrid;
