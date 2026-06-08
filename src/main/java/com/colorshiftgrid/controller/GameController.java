@@ -27,10 +27,10 @@ public class GameController {
     private final GameView view;
     private final PuzzleSolver solver;
     private final Stack<GameState> history;
+    private final LevelGenerator generator;
 
     private GameMode mode;
     private int steps;
-    private int[][] initialGrid;
     private int[][] currentTargetGrid;
     private List<Move> currentSolution;
 
@@ -40,12 +40,12 @@ public class GameController {
         this.mode=mode;
         this.history=new Stack<>();
         this.solver = new PuzzleSolver();
+        this.generator=new LevelGenerator();
         this.steps = 0;
-        this.initialGrid = board.copyGrid();
         this.currentTargetGrid = null;
         this.currentSolution = List.of();
 
-        updateView();
+        changeMode(getCurrentModeName());
     }
 
     public void handleClick(int row, int col) {
@@ -120,8 +120,7 @@ public class GameController {
     }
 
     public void changeMode(String modeName) {
-        LevelGenerator generator = new LevelGenerator();
-        int size = board.getGrid().length;
+        int size = board.getSize();
 
         switch (modeName) {
             case "Classic Mode" -> {
@@ -133,7 +132,7 @@ public class GameController {
             }
 
             case "Challenge Mode" -> {
-                this.mode = new ChallengeMode(12);
+                this.mode = new ChallengeMode(15);
                 this.currentTargetGrid = null;
 
                 board.resetTo(generator.generateLevel(size, 5).getGrid());
@@ -143,7 +142,7 @@ public class GameController {
             case "Pattern Mode" -> {
                 Board startBoard = generator.generateLevel(size, 4);
 
-                Board targetBoard = new Board(size, false);
+                Board targetBoard = new Board(size);
                 targetBoard.resetTo(startBoard.getGrid());
                 generator.applyRandomMoves(targetBoard, 4);
 
@@ -156,7 +155,6 @@ public class GameController {
             }
         }
 
-        this.initialGrid = board.copyGrid();
         history.clear();
         steps = 0;
 
