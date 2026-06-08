@@ -9,13 +9,23 @@ import java.util.List;
 public class LevelGenerator {
 
     public Board generateLevel(int size, int moves) {
-        Board board = new Board(size,false);
+        Board board = new Board(size);
         applyRandomMoves(board, moves);
         return board;
     }
 
+    public int suggestedScrambleMoves(int size) {
+        if (size <= 3) return 4;
+        if (size == 4) return 7;
+        return 10;
+    }
+
+    public Board generateDefaultLevel(int size){
+        return generateLevel(size,suggestedScrambleMoves(size));
+    }
+
     public void applyRandomMoves(Board board, int moves) {
-        int size = board.getGrid().length;
+        int size = board.getSize();
 
         List<int[]> positions = new ArrayList<>();
 
