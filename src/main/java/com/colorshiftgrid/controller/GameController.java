@@ -264,7 +264,7 @@ public class GameController {
                         ▸ Click on cell to change its color.
                         
                         ▸ Neighbour cells (Up, Down, Left, Right)
-                          will change their color simultaneously!
+                          will change their color simultaneously! (Red-Yellow-Green-Blue)
                         
                         ▸ CLASSIC: One color grid.
                         ▸ CHALLENGE: Win before the step limit.
